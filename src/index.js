@@ -1,7 +1,8 @@
-import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import app from './application';
 
 export default function init() {
-  console.log('Hello');
+  app();
   return true;
 }
 

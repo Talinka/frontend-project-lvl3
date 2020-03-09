@@ -3,14 +3,21 @@
   <head>
   </head>
   <body>
-    <div class="jumbotron">
-      <form>
-        <div class="form-group">
-          <label for="inputRss">RSS feed:</label>
-          <input class="form-control" id="inputRss">
-        </div>
-        <button type="button" class="btn btn-primary">Add</button>
-      </form>
+    <div class="container" id="container">
+      <div class="jumbotron">
+        <form id='feedForm' class="needs-validation" novalidate>
+          <div class="form-group">
+            <label for="inputRss">RSS feed:</label>
+            <input class="form-control" id="feedInput" required>
+            <div id="invalid-feedback" class="invalid-feedback">error</div>
+          </div>
+          <button id="addButton" type="submit" class="btn btn-primary">Add</button>
+        </form>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-4 themed-grid-col" id="feedContainer"></div>
+        <div class="col-md-8 themed-grid-col" id="postContainer"></div>
+      </div>
     </div>
   </body>
 </html>
