@@ -1,9 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import app from './application';
+import {
+  inputChangeHandle,
+  addFeedHandle,
+  updateFeedsHandle,
+  renderer,
+} from './render';
 
-export default function init() {
-  app();
-  return true;
-}
-
-init();
+app(renderer, addFeedHandle, inputChangeHandle, updateFeedsHandle);

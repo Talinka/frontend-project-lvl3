@@ -6,16 +6,17 @@ export default function parse(rssString) {
     const channelTitleTag = doc.querySelector('channel title');
     const channelDescriptionTag = doc.querySelector('channel description');
 
-    const items = [...doc.querySelectorAll('item')]
-      .map((item) => ({
-        title: item.querySelector('title').textContent,
-        link: item.querySelector('link').textContent,
+    const posts = [...doc.querySelectorAll('item')]
+      .map((post) => ({
+        title: post.querySelector('title').textContent,
+        link: post.querySelector('link').textContent,
+        pubDate: post.querySelector('pubDate').textContent,
       }));
 
     const channelObject = {
       title: channelTitleTag.textContent,
       description: channelDescriptionTag.textContent,
-      items,
+      posts,
     };
 
     return channelObject;
