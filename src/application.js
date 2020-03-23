@@ -16,9 +16,8 @@ const main = (renders, addFeedHandle, inputChangeHandle, updateFeedsHandle) => {
 
   watch(state, 'feeds', () => renders.feeds(state));
   watch(state, 'inputState', () => renders.validity(state));
-  watch(state, 'feedAddingState', () => renders.alert(state));
+  watch(state, 'feedAddingState', () => renders.feedAdding(state));
 
-  renders.alert(state);
   renders.validity(state);
   updateFeedsHandle(state);
 };
