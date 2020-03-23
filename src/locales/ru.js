@@ -4,5 +4,10 @@ export default {
       incorrectUrl: 'Введен некорректный url',
       alreadyAdded: 'Вы уже подписаны на этот источник',
     },
+    feedState: {
+      success: 'Последнее обновление в {{- time}}',
+      error: 'Ошибка при попытке обновить: {{errorMsg}}',
+    },
+    addError: 'Не удалось добавить подписку.',
   },
 };

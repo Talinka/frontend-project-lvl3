@@ -7,7 +7,7 @@ install-deps:
 	npm install
 
 build:
-	rm -rf dist
+	rm -rf distcd
 	NODE_ENV=production npx webpack
 
 lint:

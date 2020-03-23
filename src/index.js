@@ -5,6 +5,6 @@ import {
   addFeedHandle,
   updateFeedsHandle,
   renderer,
-} from './render';
+} from './renders';
 
 app(renderer, addFeedHandle, inputChangeHandle, updateFeedsHandle);

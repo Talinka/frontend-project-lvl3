@@ -4,6 +4,24 @@
     <meta charset="utf-8">
   </head>
   <body>
+    <div class="modal" id="errorModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Error</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p id="modalInfo"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="container" id="container">
       <div class="jumbotron">
         <form id='feedForm' class="needs-validation" novalidate>
@@ -12,13 +30,22 @@
             <input class="form-control" id="feedInput" required>
             <div id="invalid-feedback" class="invalid-feedback">error</div>
           </div>
-          <button id="addButton" type="submit" class="btn btn-primary">Add</button>
+          <button id="addButton" type="submit" class="btn btn-primary collapse show">Add</button>
+          <button id="loadingButton" class="btn btn-primary collapse" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+          </button>
         </form>
       </div>
-      <div id="errorAlert" class="alert alert-danger" role="alert" display="none"></div>
+      <div class="text-center">
+        <h2>Your feeds:</h2>
+      </div>
       <div class="row mb-3">
-        <div class="col-md-4 themed-grid-col" id="feedContainer"></div>
-        <div class="col-md-8 themed-grid-col" id="postContainer"></div>
+        <div class="col-md-4 themed-grid-col" id="feedContainer">
+        </div>
+        <div class="col-md-8 themed-grid-col" id="postContainer">
+          <p>You don't have any subscription yet</p>
+        </div>
       </div>
     </div>
   </body>
