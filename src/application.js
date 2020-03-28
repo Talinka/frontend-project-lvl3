@@ -1,3 +1,5 @@
+/* eslint no-param-reassign: ["error", { "props": false }] */
+
 import _ from 'lodash';
 import { watch } from 'melanke-watchjs';
 import i18next from 'i18next';
@@ -18,7 +20,13 @@ const loadFeed = (urlString) => {
 };
 
 const getFeedData = (url) => loadFeed(url)
-  .then((data) => parseRss(data))
+  .then((data) => {
+    try {
+      return parseRss(data);
+    } catch (e) {
+      throw new Error(i18next.t('parseError'));
+    }
+  })
   .then((rssObject) => ({ result: 'success', rssObject }))
   .catch((error) => ({ result: 'error', error }));
 

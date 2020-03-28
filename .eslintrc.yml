@@ -17,5 +17,4 @@ extends:
   - 'plugin:jest/recommended'
 
 rules:
-  no-param-reassign: ["error", { "props": false }]
   no-console: ["error", { allow: ["warn", "error"] }]

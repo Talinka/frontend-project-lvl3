@@ -12,7 +12,8 @@ const renderFeedAdding = (elements, state, closeModalHandle) => {
     elements.addButton.classList.add('show');
   }
   if (feedAddingState === 'error') {
-    elements.modalInfo.textContent = `${i18next.t('addError')} ${feedAddingError}`;
+    const { modalInfo } = elements;
+    modalInfo.textContent = `${i18next.t('addError')} ${feedAddingError}`;
     $('#errorModal').modal();
     $('#errorModal').on('hidden.bs.modal', closeModalHandle(state));
   }
@@ -28,11 +29,13 @@ const renderValidity = (elements, state) => {
     if (inputState === 'empty') {
       elements.feedInput.classList.remove('is-invalid');
     } else {
-      elements.feedBack.textContent = i18next.t(`validation.${inputState}`);
-      elements.feedInput.classList.add('is-invalid');
+      const { feedBack, feedInput } = elements;
+      feedBack.textContent = i18next.t(`validation.${inputState}`);
+      feedInput.classList.add('is-invalid');
     }
   }
-  elements.addButton.disabled = inputState !== 'valid';
+  const { addButton } = elements;
+  addButton.disabled = inputState !== 'valid';
 };
 
 const renderFeeds = (elements, state) => {

@@ -9,5 +9,6 @@ export default {
       error: 'Error then try to update: {{errorMsg}}',
     },
     addError: 'This feed cannot be added.',
+    parseError: 'This url is not a valid rss-channel',
   },
 };
