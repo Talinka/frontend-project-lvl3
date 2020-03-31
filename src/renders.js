@@ -2,9 +2,29 @@ import i18next from 'i18next';
 import $ from 'jquery';
 import 'bootstrap';
 
+const renderValidity = (elements, state) => {
+  const { inputValid, inputError } = state;
+  if (inputValid) {
+    elements.feedInput.classList.remove('is-invalid');
+    elements.feedInput.classList.add('is-valid');
+  } else {
+    elements.feedInput.classList.remove('is-valid');
+    if (inputError === 'empty') {
+      elements.feedInput.classList.remove('is-invalid');
+    } else {
+      const { feedBack, feedInput } = elements;
+      feedBack.textContent = i18next.t(`validation.${inputError}`);
+      feedInput.classList.add('is-invalid');
+    }
+  }
+  const { addButton } = elements;
+  addButton.disabled = !inputValid;
+};
+
 const renderFeedAdding = (elements, state, closeModalHandle) => {
   const { feedAddingState, feedAddingError } = state;
   if (feedAddingState === 'loading') {
+    elements.form.reset();
     elements.loadingButton.classList.add('show');
     elements.addButton.classList.remove('show');
   } else {
@@ -17,25 +37,6 @@ const renderFeedAdding = (elements, state, closeModalHandle) => {
     $('#errorModal').modal();
     $('#errorModal').on('hidden.bs.modal', closeModalHandle(state));
   }
-};
-
-const renderValidity = (elements, state) => {
-  const { inputState } = state;
-  if (inputState === 'valid') {
-    elements.feedInput.classList.remove('is-invalid');
-    elements.feedInput.classList.add('is-valid');
-  } else {
-    elements.feedInput.classList.remove('is-valid');
-    if (inputState === 'empty') {
-      elements.feedInput.classList.remove('is-invalid');
-    } else {
-      const { feedBack, feedInput } = elements;
-      feedBack.textContent = i18next.t(`validation.${inputState}`);
-      feedInput.classList.add('is-invalid');
-    }
-  }
-  const { addButton } = elements;
-  addButton.disabled = inputState !== 'valid';
 };
 
 const renderFeeds = (elements, state) => {

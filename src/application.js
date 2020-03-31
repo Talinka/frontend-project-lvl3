@@ -20,19 +20,12 @@ const loadFeed = (urlString) => {
 };
 
 const getFeedData = (url) => loadFeed(url)
-  .then((data) => {
-    try {
-      return parseRss(data);
-    } catch (e) {
-      throw new Error(i18next.t('parseError'));
-    }
-  })
-  .then((rssObject) => ({ result: 'success', rssObject }))
-  .catch((error) => ({ result: 'error', error }));
+  .then((data) => parseRss(data));
 
 const getUpdatePropmises = (state) => {
   const promises = state.feeds.map((feed) => getFeedData(feed.url)
-    .then((data) => ({ ...data, feed })));
+    .then((rssObject) => ({ rssObject, feed }))
+    .catch((error) => ({ error, feed })));
 
   return Promise.all(promises);
 };
@@ -50,17 +43,22 @@ const validate = (value, feeds) => {
       if (_.map(feeds, 'url').includes(value)) {
         return 'alreadyAdded';
       }
-      return 'valid';
+      return null;
     });
 };
 
-const inputChangeHandle = (elements, state) => () => {
-  state.inputText = elements.feedInput.value;
-  const { feeds } = state;
-  validate(state.inputText, feeds)
-    .then((result) => {
-      state.inputState = result;
+const updateValidationState = (state) => {
+  validate(state.inputText, state.feeds)
+    .then((error) => {
+      state.inputValid = _.isNull(error);
+      state.inputError = error;
     });
+};
+
+
+const handleInputChange = (elements, state) => () => {
+  state.inputText = elements.feedInput.value;
+  updateValidationState(state);
 };
 
 const getNewPosts = (state, feedId, posts) => {
@@ -77,87 +75,60 @@ const getNewFeed = (url, rssObject) => {
     url,
     title,
     description,
-    state: 'success',
+    state: 'updated',
     lastUpdateTime: new Date(),
   };
   return newFeed;
 };
 
-const addFeedHandle = (elements, state) => (e) => {
+const handleFeedAdd = (elements, state) => (e) => {
   e.preventDefault();
   const url = state.inputText;
-  elements.form.reset();
-  state.inputState = 'empty';
   state.feedAddingState = 'loading';
 
   getFeedData(url)
-    .then(({ result, rssObject, error }) => {
-      if (result === 'success') {
-        const newFeed = getNewFeed(url, rssObject);
-        const newPosts = getNewPosts(state, newFeed.id, rssObject.posts);
-        state.feeds = [newFeed, ...state.feeds];
-        state.posts = [...newPosts, ...state.posts];
-        state.feedAddingState = 'ready';
-      } else if (result === 'error') {
-        console.error(error.message);
-        state.feedAddingError = error.message;
-        state.feedAddingState = 'error';
+    .then((rssObject) => {
+      const newFeed = getNewFeed(url, rssObject);
+      const newPosts = getNewPosts(state, newFeed.id, rssObject.posts);
+      state.feeds = [newFeed, ...state.feeds];
+      state.posts = [...newPosts, ...state.posts];
+      state.feedAddingState = 'ready';
+    })
+    .catch((error) => {
+      console.error(error.message);
+      if (error instanceof TypeError) {
+        state.feedAddingError = i18next.t('parseError');
+      } else {
+        state.feedAddingError = `${i18next.t('networkError')}${error.message}`;
       }
+      state.feedAddingState = 'error';
+    })
+    .then(() => {
+      state.inputText = elements.feedInput.value;
+      updateValidationState(state);
     });
 };
 
-const updateFeedsHandle = (state) => {
+const handleFeedUpdate = (state) => {
   setTimeout(() => getUpdatePropmises(state)
     .then((results) => {
-      results.forEach(({
-        result, feed, rssObject, error,
-      }) => {
-        if (result === 'error') {
+      results.forEach(({ feed, rssObject, error }) => {
+        if (error) {
           console.error(error.message);
           feed.error = error.message;
         } else {
           const newPosts = getNewPosts(state, feed.id, rssObject.posts);
           state.posts = [...newPosts, ...state.posts];
         }
-        feed.state = result;
+        feed.state = error ? 'error' : 'updated';
         feed.lastUpdateTime = new Date();
       });
-      updateFeedsHandle(state);
+      handleFeedUpdate(state);
     }), timeout);
 };
 
-const completeAddingHandle = (state) => () => {
+const handleLoadComplete = (state) => () => {
   state.feedAddingState = 'ready';
-};
-
-const main = () => {
-  const state = {
-    feeds: [],
-    posts: [],
-    inputText: '',
-    inputState: 'empty',
-    feedAddingState: 'ready',
-    feedAddingError: null,
-  };
-
-  const elements = {
-    addButton: document.getElementById('addButton'),
-    loadingButton: document.getElementById('loadingButton'),
-    feedInput: document.getElementById('feedInput'),
-    form: document.getElementById('feedForm'),
-    formGroup: document.querySelector('.form-group'),
-    feedBack: document.querySelector('.invalid-feedback'),
-    modalInfo: document.getElementById('modalInfo'),
-  };
-
-  elements.form.addEventListener('submit', addFeedHandle(elements, state));
-  elements.feedInput.addEventListener('input', inputChangeHandle(elements, state));
-
-  watch(state, 'feeds', () => renderer.feeds(elements, state));
-  watch(state, 'inputState', () => renderer.validity(elements, state));
-  watch(state, 'feedAddingState', () => renderer.feedAdding(elements, state, completeAddingHandle));
-
-  updateFeedsHandle(state);
 };
 
 export default function () {
@@ -165,7 +136,35 @@ export default function () {
     lng: 'en',
     debug: true,
     resources,
-  }).then(() => {
-    main();
-  });
+  })
+    .then(() => {
+      const state = {
+        feeds: [],
+        posts: [],
+        inputText: '',
+        inputValid: false,
+        inputError: 'empty',
+        feedAddingState: 'ready',
+        feedAddingError: null,
+      };
+
+      const elements = {
+        addButton: document.getElementById('addButton'),
+        loadingButton: document.getElementById('loadingButton'),
+        feedInput: document.getElementById('feedInput'),
+        form: document.getElementById('feedForm'),
+        formGroup: document.querySelector('.form-group'),
+        feedBack: document.querySelector('.invalid-feedback'),
+        modalInfo: document.getElementById('modalInfo'),
+      };
+
+      elements.form.addEventListener('submit', handleFeedAdd(elements, state));
+      elements.feedInput.addEventListener('input', handleInputChange(elements, state));
+
+      watch(state, 'feeds', () => renderer.feeds(elements, state));
+      watch(state, 'inputError', () => renderer.validity(elements, state));
+      watch(state, 'feedAddingState', () => renderer.feedAdding(elements, state, handleLoadComplete));
+
+      handleFeedUpdate(state);
+    });
 }

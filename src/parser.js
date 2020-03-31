@@ -1,10 +1,9 @@
-export default function parse(rssString) {
+export default function parse(rssData) {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(rssString, 'text/xml');
+  const doc = parser.parseFromString(rssData, 'text/xml');
 
-
-  const channelTitleTag = doc.querySelector('channel title');
-  const channelDescriptionTag = doc.querySelector('channel description');
+  const channelTitleTag = doc.querySelector('channel > title');
+  const channelDescriptionTag = doc.querySelector('channel > description');
 
   const posts = [...doc.querySelectorAll('item')]
     .map((post) => ({
