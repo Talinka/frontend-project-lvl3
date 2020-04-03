@@ -9,7 +9,7 @@ const renderValidity = (elements, state) => {
     elements.feedInput.classList.add('is-valid');
   } else {
     elements.feedInput.classList.remove('is-valid');
-    if (inputError === 'empty') {
+    if (inputError === 'required') {
       elements.feedInput.classList.remove('is-invalid');
     } else {
       const { feedBack, feedInput } = elements;
@@ -33,15 +33,14 @@ const renderFeedAdding = (elements, state, closeModalHandle) => {
   }
   if (feedAddingState === 'error') {
     const { modalInfo } = elements;
-    modalInfo.textContent = `${i18next.t('addError')} ${feedAddingError}`;
+    modalInfo.textContent = i18next.t(`feedAddingError.${feedAddingError}`);
     $('#errorModal').modal();
     $('#errorModal').on('hidden.bs.modal', closeModalHandle(state));
   }
 };
 
 const renderFeeds = (elements, state) => {
-  const feedContainer = document.getElementById('feedContainer');
-  const postContainer = document.getElementById('postContainer');
+  const { feedContainer, postContainer } = elements;
   feedContainer.innerHTML = '';
   postContainer.innerHTML = '';
   const feedList = document.createElement('ul');

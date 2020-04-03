@@ -31,27 +31,24 @@ const getUpdatePropmises = (state) => {
 };
 
 const validate = (value, feeds) => {
-  const schema = string().url();
-  return schema.isValid(value)
-    .then((valid) => {
-      if (!value) {
-        return 'empty';
-      }
-      if (!valid) {
-        return 'incorrectUrl';
-      }
-      if (_.map(feeds, 'url').includes(value)) {
-        return 'alreadyAdded';
-      }
-      return null;
-    });
+  const schema = string()
+    .required()
+    .url()
+    .notOneOf(_.map(feeds, 'url'));
+
+  return schema.validate((value));
 };
 
 const updateValidationState = (state) => {
   validate(state.inputText, state.feeds)
-    .then((error) => {
-      state.inputValid = _.isNull(error);
-      state.inputError = error;
+    .then(() => {
+      state.inputError = null;
+    })
+    .catch((error) => {
+      state.inputError = error.type;
+    })
+    .then(() => {
+      state.inputValid = _.isNull(state.inputError);
     });
 };
 
@@ -90,16 +87,16 @@ const handleFeedAdd = (elements, state) => (e) => {
     .then((rssObject) => {
       const newFeed = getNewFeed(url, rssObject);
       const newPosts = getNewPosts(state, newFeed.id, rssObject.posts);
-      state.feeds = [newFeed, ...state.feeds];
-      state.posts = [...newPosts, ...state.posts];
+      state.feeds.unshift(newFeed);
+      state.posts.unshift(...newPosts);
       state.feedAddingState = 'ready';
     })
     .catch((error) => {
       console.error(error.message);
       if (error instanceof TypeError) {
-        state.feedAddingError = i18next.t('parseError');
+        state.feedAddingError = 'parseError';
       } else {
-        state.feedAddingError = `${i18next.t('networkError')}${error.message}`;
+        state.feedAddingError = 'networkError';
       }
       state.feedAddingState = 'error';
     })
@@ -118,7 +115,7 @@ const handleFeedUpdate = (state) => {
           feed.error = error.message;
         } else {
           const newPosts = getNewPosts(state, feed.id, rssObject.posts);
-          state.posts = [...newPosts, ...state.posts];
+          state.posts.unshift(...newPosts);
         }
         feed.state = error ? 'error' : 'updated';
         feed.lastUpdateTime = new Date();
@@ -143,7 +140,7 @@ export default function () {
         posts: [],
         inputText: '',
         inputValid: false,
-        inputError: 'empty',
+        inputError: 'required',
         feedAddingState: 'ready',
         feedAddingError: null,
       };
@@ -155,6 +152,8 @@ export default function () {
         form: document.getElementById('feedForm'),
         formGroup: document.querySelector('.form-group'),
         feedBack: document.querySelector('.invalid-feedback'),
+        feedContainer: document.getElementById('feedContainer'),
+        postContainer: document.getElementById('postContainer'),
         modalInfo: document.getElementById('modalInfo'),
       };
 
